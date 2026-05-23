@@ -4,8 +4,13 @@ A Interface. Desenha botões, caixas
 (CTkEntry), lida com pop-ups de
 erro e o gráfico do Matplotlib.
 '''
+import customtkinter as ctk
+from customtkinter import CTkMessagebox
 from modelo import inserir_produtos, buscar_produto, atualizar_preco, deletar_produto
 from controlador import processar_cadastro
+
+
+
 
 
 while True:

@@ -6,42 +6,93 @@ produtos e comandos SQL diretos
 (INSERT, SELECT, UPDATE,
 DELETE).
 '''
+import customtkinter as ctk
+from customtkinter import CTkMessagebox
+import random
 import sqlite3
+from tela import salvar_dados
 
 def conectar():
     return sqlite3.connect("banco_dados.db")
 
 def criar_tabela():
-    conexao = conectar()
-    cursor = conexao.cursor()
-
-    cursor.execute(
-        ''' CREATE TABLE IF NOT EXISTS produtos(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL,
-        preco INTEGER NOT NULL,
-        qtd INTEGER NOT NULL)
-''')
+    try:
+        conexao = conectar()
+        cursor = conexao.cursor()
     
-    conexao.commit()
-    conexao.close()
+        cursor.execute(
+            ''' CREATE TABLE IF NOT EXISTS produtos(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            preco REAL NOT NULL,
+            qtd INTEGER NOT NULL)
+    ''')
+        
+        conexao.commit()
+        return conexao
+    except sqlite3.Erro as e:
+        print(f"Erro ao conectar ou criar tabela: {e}")
+        raise
 
+class AppCadastrarProduto(ctk.CTk):
+    def __init__(janela):
+        super().__init__()
+        janela.geometry("400x400")
+        janela.title("Cadastro de Produtos")
 
-def inserir_produtos(nome_prod, preco, qtd):
+        lbl_produto = ctk.CTkLabel(janela, text="Novo Produto")
+        lbl_produto.pack(pady=20)
+
+        nome_prod = ctk.CTkEntry(janela, placeholder_text="Nome")
+        nome_prod.pack(pady=10)
+
+        preco = ctk.CTkEntry(janela, placeholder_text="Preço")
+        preco.pack(pady=10)
+
+        qtd = ctk.CTkEntry(janela, placeholder_text="Qunatidade")
+        qtd.pack(pady=10)
+
+        btn_salvar = ctk.CTkButton(janela, text="Salvar", command=inserir_produtos)
+        btn_salvar.pack(pady=20) 
+
+        ldl_mensagem = ctk.CTkLabel(janela, text="")
+        ldl_mensagem.pack()
+
+        janela.mainloop()        
+
+def inserir_produtos(janela):
+    janela.lbl_mensagem.configure()
+    if not nome_prod or not preco or not qtd:
+        raise ValueError("Todos os campos devem ser preenchidos.")
+    
+    
     conexao = conectar()
     cursor = conexao.cursor()
 
     print("\n--- Novo Produto ---\n")
-    nome_prod = input("Nome do produto: ")
-    preco = float(input("Preço unitário do produto(R$): "))
-    qtd = int(input("Quantidade: "))
+    nome_prod = (input("Nome do produto: "))
+    try:    
+        preco = float(input("Preço unitário do produto(R$): "))
+        qtd = int(input("Quantidade: "))
+    except ValueError:
+        raise ValueError("Preço e qunatidade devem ser números válidos.")
+
+    if preco <=0 or qtd <= 0:
+        raise ValueError("Preço e quantidade devem ser maiores que zero.")
+
+    if random.random() < 0.1: # 10% de chance de falha
+        raise RuntimeError("Erro inesperado ao salvar no banco de dados.")
+    
+    print(f"Produto Salvo: Nome = {nome_prod}, Preço = {preco}, Quantidade = {qtd}")
+    return True
 
     cmd_sql = "INSERT INTO produtos (nome, preco, qtd) VALUES (?, ?, ?)"
 
     cursor.execute(cmd_sql, (nome_prod, preco, qtd))
 
     conexao.commit()
-    print("Produto cadastrado com sucesso!")
+
+    lbl_mensagem.configure(text="Produto inserido com sucesso!", text_color="green")
 
 def buscar_produto():
     print("\n--- Lista de Produtos ---\n")
