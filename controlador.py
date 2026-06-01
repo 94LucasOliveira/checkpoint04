@@ -5,17 +5,30 @@ estão vazios, converte textos para
 números e faz a ponte segura entre
 a Interface e o Modelo.
 '''
-from modelo import inserir_produtos
+from modelo import Modelo
 
-def processar_cadastro (nome, p_txt, q_txt):
-    if nome == "" or p_txt == "":
-        return False, "Campos vazios!"
-    
-    try:
-        preco = float(p_txt)
-        qtd = int(q_txt)
-    except ValueError:
-        return False, "Erro nos números!"
-    
-    inserir_produtos(nome, preco, qtd)
-    return True, "Produto cadastrado!"
+
+class Controlador:
+
+    def __init__(self):
+        self.modelo = Modelo()
+
+    def salvar_produto(self, nome, preco, quantidade):
+
+        try:
+            preco = float(preco)
+            quantidade = int(quantidade)
+
+            self.modelo.salvar_produto(
+                nome,
+                preco,
+                quantidade
+            )
+
+            return True
+
+        except ValueError:
+            return False
+
+    def buscar_produto(self):
+        return self.modelo.buscar_produto()
